@@ -1,11 +1,12 @@
 import { Layout } from "@/components/layout/Layout";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { RecentActivityFeed } from "@/components/dashboard/RecentActivity";
-import { Users, DollarSign, Trophy, UserPlus, Loader2 } from "lucide-react";
+import { Users, DollarSign, Trophy, UserPlus, Loader2, AlertTriangle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { dashboardStatsQueryOptions, activityQueryOptions, topUsersQueryOptions, gamesQueryOptions } from "@/lib/api";
+import { dashboardStatsQueryOptions, activityQueryOptions, topUsersQueryOptions, gamesQueryOptions, usersQueryOptions } from "@/lib/api";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
 
@@ -14,6 +15,11 @@ export default function Dashboard() {
   const { data: activity = [] } = useQuery(activityQueryOptions(20));
   const { data: topUsers } = useQuery(topUsersQueryOptions());
   const { data: games = [] } = useQuery(gamesQueryOptions());
+  const { data: users = [] } = useQuery(usersQueryOptions());
+
+  // Calculate alert counts
+  const highRiskUsers = users.filter(u => u.riskLevel === 'High');
+  const largeTransactions = activity.filter(a => Number(a.amount) > 10000);
 
   // Transform games data for chart
   const gamePerformanceData = games
@@ -47,9 +53,29 @@ export default function Dashboard() {
   return (
     <Layout>
       <div className="flex flex-col gap-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Executive Overview</h1>
-          <p className="text-muted-foreground">Real-time monitoring of casino operations and performance metrics.</p>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight mb-2">Executive Overview</h1>
+            <p className="text-muted-foreground">Real-time monitoring of casino operations and performance metrics.</p>
+          </div>
+          
+          {/* Alert Indicators */}
+          {(highRiskUsers.length > 0 || largeTransactions.length > 0) && (
+            <div className="flex items-center gap-3">
+              {highRiskUsers.length > 0 && (
+                <Link href="/players" className="flex items-center gap-2 px-3 py-2 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm animate-pulse hover:bg-destructive/20 transition-colors">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span className="font-medium">{highRiskUsers.length} High Risk Players</span>
+                </Link>
+              )}
+              {largeTransactions.length > 0 && (
+                <div className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-500 text-sm">
+                  <DollarSign className="h-4 w-4" />
+                  <span className="font-medium">{largeTransactions.length} Large Transactions</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* KPI Grid */}
@@ -61,6 +87,7 @@ export default function Dashboard() {
             description="Total active accounts"
             trend="up"
             trendValue="+12%"
+            tooltip="Number of players with 'Active' status who can place bets"
           />
           <StatCard
             title="Gross Gaming Revenue"
@@ -70,6 +97,7 @@ export default function Dashboard() {
             trend="up"
             trendValue="+5.2%"
             className="border-l-primary"
+            tooltip="GGR = Total Bets - Total Wins. This is the gross revenue before deducting operational costs."
           />
           <div onClick={() => topWinner && window.location.assign(`/players/${topWinner.id}`)} className="cursor-pointer">
             <StatCard
@@ -78,6 +106,7 @@ export default function Dashboard() {
               icon={Trophy}
               description={topWinner ? `User: ${topWinner.username}` : 'No data'}
               className="border-l-amber-500 cursor-pointer hover:bg-muted/50 transition-colors"
+              tooltip="Player with the highest net winnings. Click to view player details."
             />
           </div>
           <StatCard
@@ -85,6 +114,7 @@ export default function Dashboard() {
             value={stats?.newSignupsToday?.toString() || '0'}
             icon={UserPlus}
             description="Since midnight"
+            tooltip="Number of new player registrations today"
           />
         </div>
 
@@ -92,7 +122,10 @@ export default function Dashboard() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
           <Card className="col-span-4">
             <CardHeader>
-              <CardTitle>Revenue Overview (GGR vs NGR)</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                Revenue Overview 
+                <Badge variant="outline" className="font-normal text-xs">GGR vs NGR</Badge>
+              </CardTitle>
             </CardHeader>
             <CardContent className="pl-2">
               <div className="h-[350px] w-full">
