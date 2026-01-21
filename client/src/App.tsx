@@ -14,6 +14,8 @@ import AffiliateDetailPage from "@/pages/affiliate-detail";
 import LiveMonitorPage from "@/pages/live-monitor";
 import SettingsPage from "@/pages/settings";
 import LeaderboardPage from "@/pages/leaderboard";
+import GlossaryPage from "@/pages/glossary";
+import AnalyticsPage from "@/pages/analytics";
 
 function Router() {
   return (
@@ -27,6 +29,8 @@ function Router() {
       <Route path="/affiliates/:id" component={AffiliateDetailPage} />
       <Route path="/live" component={LiveMonitorPage} />
       <Route path="/leaderboard" component={LeaderboardPage} />
+      <Route path="/analytics" component={AnalyticsPage} />
+      <Route path="/glossary" component={GlossaryPage} />
       <Route path="/settings" component={SettingsPage} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
