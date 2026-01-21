@@ -4,9 +4,14 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useQuery } from "@tanstack/react-query";
 import { gamesQueryOptions, type Game } from "@/lib/api";
-import { Users, Coins, Loader2 } from "lucide-react";
+import { Users, Coins, Loader2, Info, TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocation } from "wouter";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function GamesPage() {
   const [, navigate] = useLocation();
@@ -40,12 +45,73 @@ export default function GamesPage() {
     );
   }
 
+  const totalNGR = games.reduce((sum, g) => sum + g.ngr, 0);
+  const totalPlays = games.reduce((sum, g) => sum + g.plays, 0);
+  const activeGames = games.filter(g => g.status === 'Active').length;
+
   return (
     <Layout>
       <div className="flex flex-col gap-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Game Performance</h1>
           <p className="text-muted-foreground">Analyze game revenue, popularity, and player engagement. Click on any game for details.</p>
+        </div>
+
+        {/* Summary Stats */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total NGR</p>
+                  <p className={cn("text-2xl font-bold font-mono", totalNGR >= 0 ? "text-success" : "text-destructive")}>
+                    {totalNGR >= 0 ? '+' : ''}{(totalNGR / 1000).toFixed(1)}k DKK
+                  </p>
+                </div>
+                {totalNGR >= 0 ? <TrendingUp className="h-8 w-8 text-success/50" /> : <TrendingDown className="h-8 w-8 text-destructive/50" />}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Plays</p>
+                  <p className="text-2xl font-bold font-mono">{totalPlays.toLocaleString()}</p>
+                </div>
+                <Coins className="h-8 w-8 text-muted-foreground/30" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Active Games</p>
+                  <p className="text-2xl font-bold">{activeGames} / {games.length}</p>
+                </div>
+                <Badge variant="outline" className="text-success border-success">{Math.round(activeGames/games.length*100)}% Active</Badge>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground flex items-center gap-1">
+                    Avg RTP
+                    <Tooltip>
+                      <TooltipTrigger><Info className="h-3 w-3" /></TooltipTrigger>
+                      <TooltipContent>Return to Player: Percentage of wagers paid back as wins</TooltipContent>
+                    </Tooltip>
+                  </p>
+                  <p className="text-2xl font-bold font-mono">
+                    {games.length > 0 ? (games.reduce((sum, g) => sum + (g.wagered > 0 ? (g.payout / g.wagered) * 100 : 0), 0) / games.length).toFixed(1) : 0}%
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
