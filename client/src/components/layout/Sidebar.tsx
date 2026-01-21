@@ -10,7 +10,8 @@ import {
   Menu,
   Trophy,
   BarChart3,
-  BookOpen
+  BookOpen,
+  Wallet
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -24,6 +25,7 @@ const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/" },
   { label: "Players", icon: Users, href: "/players" },
   { label: "Leaderboard", icon: Trophy, href: "/leaderboard" },
+  { label: "Withdrawals", icon: Wallet, href: "/withdrawals" },
   { label: "Analytics", icon: BarChart3, href: "/analytics" },
   { label: "Game Performance", icon: Gamepad2, href: "/games" },
   { label: "Affiliates", icon: HandCoins, href: "/affiliates" },

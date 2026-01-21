@@ -153,3 +153,20 @@ export const leaderboardQueryOptions = () =>
     queryKey: ["leaderboard"],
     queryFn: () => fetchJson<TopUsers>("/api/leaderboard"),
   });
+
+export type Withdrawal = {
+  id: string;
+  userId: string;
+  amount: string;
+  timestamp: string;
+  withdrawalStatus: 'Pending' | 'Approved' | 'Reversed' | null;
+  username: string;
+  email: string;
+};
+
+export const withdrawalsQueryOptions = () =>
+  queryOptions({
+    queryKey: ["withdrawals"],
+    queryFn: () => fetchJson<Withdrawal[]>("/api/withdrawals"),
+    refetchInterval: 10000,
+  });

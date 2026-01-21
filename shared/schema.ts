@@ -8,6 +8,7 @@ export const riskLevelEnum = pgEnum('risk_level', ['Low', 'Medium', 'High', 'VIP
 export const gameTypeEnum = pgEnum('game_type', ['Bingo', 'Slot', 'Table', 'Live']);
 export const gameStatusEnum = pgEnum('game_status', ['Active', 'Maintenance']);
 export const transactionTypeEnum = pgEnum('transaction_type', ['Bet', 'Win', 'Deposit', 'Withdrawal', 'Jackpot']);
+export const withdrawalStatusEnum = pgEnum('withdrawal_status', ['Pending', 'Approved', 'Reversed']);
 export const affiliateStatusEnum = pgEnum('affiliate_status', ['Active', 'Inactive']);
 
 // Users Table
@@ -79,6 +80,7 @@ export const transactions = pgTable("transactions", {
   type: transactionTypeEnum("type").notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   timestamp: timestamp("timestamp").notNull().defaultNow(),
+  withdrawalStatus: withdrawalStatusEnum("withdrawal_status"),
 });
 
 export const insertTransactionSchema = createInsertSchema(transactions).omit({

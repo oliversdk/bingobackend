@@ -16,6 +16,7 @@ import SettingsPage from "@/pages/settings";
 import LeaderboardPage from "@/pages/leaderboard";
 import GlossaryPage from "@/pages/glossary";
 import AnalyticsPage from "@/pages/analytics";
+import WithdrawalsPage from "@/pages/withdrawals";
 
 function Router() {
   return (
@@ -30,6 +31,7 @@ function Router() {
       <Route path="/live" component={LiveMonitorPage} />
       <Route path="/leaderboard" component={LeaderboardPage} />
       <Route path="/analytics" component={AnalyticsPage} />
+      <Route path="/withdrawals" component={WithdrawalsPage} />
       <Route path="/glossary" component={GlossaryPage} />
       <Route path="/settings" component={SettingsPage} />
       {/* Fallback to 404 */}

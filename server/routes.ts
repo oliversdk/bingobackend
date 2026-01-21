@@ -226,5 +226,37 @@ export async function registerRoutes(
     }
   });
 
+  // WITHDRAWALS API
+  app.get("/api/withdrawals", async (req: Request, res: Response) => {
+    try {
+      const withdrawals = await storage.getWithdrawals();
+      res.json(withdrawals);
+    } catch (error) {
+      console.error("Error fetching withdrawals:", error);
+      res.status(500).json({ error: "Failed to fetch withdrawals" });
+    }
+  });
+
+  app.patch("/api/withdrawals/:id", async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      if (!['Pending', 'Approved', 'Reversed'].includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+
+      const updated = await storage.updateWithdrawalStatus(id, status);
+      if (!updated) {
+        return res.status(404).json({ error: "Withdrawal not found" });
+      }
+
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating withdrawal:", error);
+      res.status(500).json({ error: "Failed to update withdrawal" });
+    }
+  });
+
   return httpServer;
 }

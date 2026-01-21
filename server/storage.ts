@@ -47,6 +47,8 @@ export interface IStorage {
   getTransactions(limit?: number, userId?: string): Promise<Transaction[]>;
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
   getRecentActivity(limit?: number): Promise<Array<Transaction & { username: string; gameName?: string }>>;
+  getWithdrawals(): Promise<Array<Transaction & { username: string; email: string }>>;
+  updateWithdrawalStatus(id: string, status: 'Pending' | 'Approved' | 'Reversed'): Promise<Transaction | undefined>;
 
   // Analytics
   getDashboardStats(): Promise<{
@@ -247,6 +249,7 @@ export class DatabaseStorage implements IStorage {
         type: transactions.type,
         amount: transactions.amount,
         timestamp: transactions.timestamp,
+        withdrawalStatus: transactions.withdrawalStatus,
         username: users.username,
         gameName: games.name,
       })
@@ -263,9 +266,49 @@ export class DatabaseStorage implements IStorage {
       type: r.type,
       amount: r.amount,
       timestamp: r.timestamp,
+      withdrawalStatus: r.withdrawalStatus,
       username: r.username || 'Unknown',
       gameName: r.gameName || undefined,
     }));
+  }
+
+  async getWithdrawals(): Promise<Array<Transaction & { username: string; email: string }>> {
+    const results = await db
+      .select({
+        id: transactions.id,
+        userId: transactions.userId,
+        gameId: transactions.gameId,
+        type: transactions.type,
+        amount: transactions.amount,
+        timestamp: transactions.timestamp,
+        withdrawalStatus: transactions.withdrawalStatus,
+        username: users.username,
+        email: users.email,
+      })
+      .from(transactions)
+      .leftJoin(users, eq(transactions.userId, users.id))
+      .where(eq(transactions.type, 'Withdrawal'))
+      .orderBy(desc(transactions.timestamp));
+
+    return results.map(r => ({
+      id: r.id,
+      userId: r.userId,
+      gameId: r.gameId,
+      type: r.type,
+      amount: r.amount,
+      timestamp: r.timestamp,
+      withdrawalStatus: r.withdrawalStatus,
+      username: r.username || 'Unknown',
+      email: r.email || '',
+    }));
+  }
+
+  async updateWithdrawalStatus(id: string, status: 'Pending' | 'Approved' | 'Reversed'): Promise<Transaction | undefined> {
+    const [tx] = await db.update(transactions)
+      .set({ withdrawalStatus: status })
+      .where(eq(transactions.id, id))
+      .returning();
+    return tx || undefined;
   }
 
   // Analytics

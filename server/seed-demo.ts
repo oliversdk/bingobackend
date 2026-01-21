@@ -95,7 +95,13 @@ export async function seedDemoDataIfEmpty() {
         amount = faker.finance.amount({ min: 100, max: 2000, dec: 2 });
         break;
       case 'Withdrawal':
-        amount = faker.finance.amount({ min: 50, max: 1500, dec: 2 });
+        amount = faker.helpers.arrayElement([
+          faker.finance.amount({ min: 50, max: 1500, dec: 2 }),
+          faker.finance.amount({ min: 50, max: 1500, dec: 2 }),
+          faker.finance.amount({ min: 50, max: 1500, dec: 2 }),
+          faker.finance.amount({ min: 5000, max: 15000, dec: 2 }),
+          faker.finance.amount({ min: 20000, max: 50000, dec: 2 }), // Large withdrawal over 20k
+        ]);
         break;
       case 'Jackpot':
         amount = faker.finance.amount({ min: 5000, max: 50000, dec: 2 });
@@ -103,13 +109,20 @@ export async function seedDemoDataIfEmpty() {
         break;
     }
 
-    transactionsToCreate.push({
+    const transaction: any = {
       userId: user.id,
       gameId,
       type,
       amount,
       timestamp: faker.date.recent({ days: 30 }),
-    });
+    };
+
+    // Add withdrawal status for withdrawal transactions
+    if (type === 'Withdrawal') {
+      transaction.withdrawalStatus = faker.helpers.arrayElement(['Pending', 'Pending', 'Pending', 'Approved', 'Approved', 'Reversed']);
+    }
+
+    transactionsToCreate.push(transaction);
   }
 
   // Insert in batches

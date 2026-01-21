@@ -1,9 +1,9 @@
 import { Layout } from "@/components/layout/Layout";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { RecentActivityFeed } from "@/components/dashboard/RecentActivity";
-import { Users, DollarSign, Trophy, UserPlus, Loader2, AlertTriangle } from "lucide-react";
+import { Users, DollarSign, Trophy, UserPlus, Loader2, AlertTriangle, Wallet } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { dashboardStatsQueryOptions, activityQueryOptions, topUsersQueryOptions, gamesQueryOptions, usersQueryOptions } from "@/lib/api";
+import { dashboardStatsQueryOptions, activityQueryOptions, topUsersQueryOptions, gamesQueryOptions, usersQueryOptions, withdrawalsQueryOptions } from "@/lib/api";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,10 +16,14 @@ export default function Dashboard() {
   const { data: topUsers } = useQuery(topUsersQueryOptions());
   const { data: games = [] } = useQuery(gamesQueryOptions());
   const { data: users = [] } = useQuery(usersQueryOptions());
+  const { data: withdrawals = [] } = useQuery(withdrawalsQueryOptions());
 
   // Calculate alert counts
   const highRiskUsers = users.filter(u => u.riskLevel === 'High');
   const largeTransactions = activity.filter(a => Number(a.amount) > 10000);
+  const largePendingWithdrawals = withdrawals.filter(w => 
+    (w.withdrawalStatus === 'Pending' || !w.withdrawalStatus) && Number(w.amount) >= 20000
+  );
 
   // Transform games data for chart
   const gamePerformanceData = games
@@ -60,8 +64,14 @@ export default function Dashboard() {
           </div>
           
           {/* Alert Indicators */}
-          {(highRiskUsers.length > 0 || largeTransactions.length > 0) && (
-            <div className="flex items-center gap-3">
+          {(highRiskUsers.length > 0 || largeTransactions.length > 0 || largePendingWithdrawals.length > 0) && (
+            <div className="flex items-center gap-3 flex-wrap">
+              {largePendingWithdrawals.length > 0 && (
+                <Link href="/withdrawals" className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-500 text-sm animate-pulse hover:bg-amber-500/20 transition-colors" data-testid="alert-large-withdrawals">
+                  <Wallet className="h-4 w-4" />
+                  <span className="font-medium">{largePendingWithdrawals.length} Store Udbetalinger (&gt;20k)</span>
+                </Link>
+              )}
               {highRiskUsers.length > 0 && (
                 <Link href="/players" className="flex items-center gap-2 px-3 py-2 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm animate-pulse hover:bg-destructive/20 transition-colors" data-testid="alert-high-risk-players">
                   <AlertTriangle className="h-4 w-4" />
