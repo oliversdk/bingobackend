@@ -30,6 +30,7 @@ Preferred communication style: Simple, everyday language.
 - **Database**: PostgreSQL (configured via DATABASE_URL environment variable)
 - **Schema Location**: `shared/schema.ts` - defines users, games, affiliates, and transactions tables
 - **Migrations**: Drizzle Kit for database migrations stored in `/migrations`
+- **Auto-Seeding**: On server startup, if the database is empty, demo data (100 users, 8 games, 5 affiliates, 5000 transactions) is automatically seeded via `server/seed-demo.ts`. This works in both development and production.
 
 ### Project Structure
 ```

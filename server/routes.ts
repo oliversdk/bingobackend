@@ -1,11 +1,15 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { seedDemoDataIfEmpty } from "./seed-demo";
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // Seed demo data if database is empty (works in both dev and production)
+  await seedDemoDataIfEmpty();
+
   // USERS API
   app.get("/api/users", async (req: Request, res: Response) => {
     try {
