@@ -2,38 +2,76 @@ import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { GAMES } from "@/lib/mockData";
-import { Gamepad2, Users, Coins, Trophy } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { gamesQueryOptions, type Game } from "@/lib/api";
+import { Users, Coins, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLocation } from "wouter";
 
 export default function GamesPage() {
-  const topGame = GAMES.reduce((prev, current) => (prev.ngr > current.ngr) ? prev : current);
+  const [, navigate] = useLocation();
+  const { data: games = [], isLoading, error } = useQuery(gamesQueryOptions());
+
+  const topGame = games.length > 0 
+    ? games.reduce((prev, current) => (prev.ngr > current.ngr) ? prev : current)
+    : null;
+
+  const handleGameClick = (gameId: string) => {
+    navigate(`/games/${gameId}`);
+  };
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-96 text-destructive">
+          Failed to load games
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
       <div className="flex flex-col gap-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Game Performance</h1>
-          <p className="text-muted-foreground">Analyze game revenue, popularity, and player engagement.</p>
+          <p className="text-muted-foreground">Analyze game revenue, popularity, and player engagement. Click on any game for details.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {GAMES.map((game) => {
-            const isTopPerformer = game.id === topGame.id;
-            // Calculate pseudo-RTP (Return to Player)
-            const rtp = (game.payout / game.wagered) * 100;
+          {games.map((game) => {
+            const isTopPerformer = topGame && game.id === topGame.id;
+            const rtp = game.wagered > 0 ? (game.payout / game.wagered) * 100 : 0;
             
             return (
-              <Card key={game.id} className={cn("overflow-hidden border-border", isTopPerformer && "border-primary/50 shadow-md shadow-primary/10")}>
+              <Card 
+                key={game.id} 
+                className={cn(
+                  "overflow-hidden border-border cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]", 
+                  isTopPerformer && "border-primary/50 shadow-md shadow-primary/10"
+                )}
+                onClick={() => handleGameClick(game.id)}
+                data-testid={`card-game-${game.id}`}
+              >
                 <div className="h-2 bg-secondary w-full relative">
                   <div 
                     className={cn("absolute inset-y-0 left-0", isTopPerformer ? "bg-primary" : "bg-muted-foreground/30")} 
-                    style={{ width: `${Math.min(100, (game.ngr / topGame.ngr) * 100)}%` }} 
+                    style={{ width: `${topGame ? Math.min(100, (game.ngr / topGame.ngr) * 100) : 0}%` }} 
                   />
                 </div>
                 <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                   <div>
-                    <CardTitle className="text-lg font-bold">{game.name}</CardTitle>
+                    <CardTitle className="text-lg font-bold text-primary hover:underline">{game.name}</CardTitle>
                     <CardDescription>{game.type}</CardDescription>
                   </div>
                   <Badge variant={game.status === 'Active' ? 'default' : 'secondary'} className={game.status === 'Active' ? 'bg-success hover:bg-success/90' : ''}>

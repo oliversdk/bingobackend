@@ -32,11 +32,9 @@ export function Sidebar() {
   const NavContent = () => (
     <div className="flex h-full flex-col gap-4">
       <div className="flex h-16 items-center px-6 border-b border-sidebar-border">
-        <Link href="/">
-          <a className="flex items-center gap-3 font-display font-bold text-xl tracking-tight text-sidebar-primary-foreground">
-            <img src={logoImage} alt="Bingo.dk" className="h-8 w-8 rounded-md" />
-            <span>Bingo<span className="text-primary">.dk</span></span>
-          </a>
+        <Link href="/" className="flex items-center gap-3 font-display font-bold text-xl tracking-tight text-sidebar-primary-foreground">
+          <img src={logoImage} alt="Bingo.dk" className="h-8 w-8 rounded-md" />
+          <span>Bingo<span className="text-primary">.dk</span></span>
         </Link>
       </div>
       <div className="flex-1 px-4 py-4">
@@ -44,18 +42,18 @@ export function Sidebar() {
           {NAV_ITEMS.map((item) => {
             const isActive = location === item.href;
             return (
-              <Link key={item.href} href={item.href}>
-                <a
-                  className={cn(
-                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm ring-1 ring-sidebar-border"
-                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                  )}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
-                </a>
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm ring-1 ring-sidebar-border"
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                )}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
               </Link>
             );
           })}

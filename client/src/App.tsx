@@ -6,8 +6,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import PlayersPage from "@/pages/players";
+import PlayerDetailPage from "@/pages/player-detail";
 import GamesPage from "@/pages/games";
+import GameDetailPage from "@/pages/game-detail";
 import AffiliatesPage from "@/pages/affiliates";
+import AffiliateDetailPage from "@/pages/affiliate-detail";
 import LiveMonitorPage from "@/pages/live-monitor";
 
 function Router() {
@@ -15,8 +18,11 @@ function Router() {
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/players" component={PlayersPage} />
+      <Route path="/players/:id" component={PlayerDetailPage} />
       <Route path="/games" component={GamesPage} />
+      <Route path="/games/:id" component={GameDetailPage} />
       <Route path="/affiliates" component={AffiliatesPage} />
+      <Route path="/affiliates/:id" component={AffiliateDetailPage} />
       <Route path="/live" component={LiveMonitorPage} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />

@@ -1,39 +1,48 @@
 import { Layout } from "@/components/layout/Layout";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { RecentActivityFeed } from "@/components/dashboard/RecentActivity";
-import { Users, DollarSign, Trophy, UserPlus } from "lucide-react";
-import { generateUsers, generateActivity, GAMES } from "@/lib/mockData";
-import { useMemo } from "react";
+import { Users, DollarSign, Trophy, UserPlus, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { dashboardStatsQueryOptions, activityQueryOptions, topUsersQueryOptions, gamesQueryOptions } from "@/lib/api";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-
-// Mock Chart Data
-const REVENUE_DATA = [
-  { name: '00:00', ggr: 4000, ngr: 3200 },
-  { name: '04:00', ggr: 3000, ngr: 2400 },
-  { name: '08:00', ggr: 2000, ngr: 1500 },
-  { name: '12:00', ggr: 2780, ngr: 2000 },
-  { name: '16:00', ggr: 1890, ngr: 1400 },
-  { name: '20:00', ggr: 2390, ngr: 1900 },
-  { name: '23:59', ggr: 3490, ngr: 2800 },
-];
-
-const GAME_PERFORMANCE_DATA = GAMES.map(g => ({
-  name: g.name,
-  plays: g.plays,
-  revenue: g.ngr
-})).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+import { Link } from "wouter";
 
 export default function Dashboard() {
-  const users = useMemo(() => generateUsers(50), []);
-  const activities = useMemo(() => generateActivity(20, users), [users]);
-  
-  // Quick Stats Calculations
-  const activePlayers = users.filter(u => u.status === 'Active').length;
-  const totalGGR = GAMES.reduce((acc, game) => acc + (game.wagered - game.payout), 0);
-  const todaysSignups = 124; // Mocked
-  const topWinner = users.reduce((prev, current) => (prev.netProfit > current.netProfit) ? prev : current);
+  const { data: stats, isLoading: statsLoading } = useQuery(dashboardStatsQueryOptions());
+  const { data: activity = [] } = useQuery(activityQueryOptions(20));
+  const { data: topUsers } = useQuery(topUsersQueryOptions());
+  const { data: games = [] } = useQuery(gamesQueryOptions());
+
+  // Transform games data for chart
+  const gamePerformanceData = games
+    .map(g => ({ name: g.name.length > 15 ? g.name.slice(0, 15) + '...' : g.name, revenue: g.ngr }))
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, 5);
+
+  // Mock revenue trend data (would come from API in production)
+  const REVENUE_DATA = [
+    { name: '00:00', ggr: 4000, ngr: 3200 },
+    { name: '04:00', ggr: 3000, ngr: 2400 },
+    { name: '08:00', ggr: 2000, ngr: 1500 },
+    { name: '12:00', ggr: 2780, ngr: 2000 },
+    { name: '16:00', ggr: 1890, ngr: 1400 },
+    { name: '20:00', ggr: 2390, ngr: 1900 },
+    { name: '23:59', ggr: 3490, ngr: 2800 },
+  ];
+
+  const topWinner = topUsers?.topWinners?.[0];
+
+  if (statsLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -47,35 +56,35 @@ export default function Dashboard() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Active Players"
-            value={activePlayers.toString()}
+            value={stats?.activeUsers?.toString() || '0'}
             icon={Users}
-            description="Currently online"
+            description="Total active accounts"
             trend="up"
             trendValue="+12%"
           />
           <StatCard
-            title="Gross Gaming Revenue (Today)"
-            value={`${(totalGGR / 1000).toFixed(1)}k DKK`}
+            title="Gross Gaming Revenue"
+            value={`${((stats?.totalGGR || 0) / 1000).toFixed(1)}k DKK`}
             icon={DollarSign}
-            description="Daily target: 150k"
+            description="Total GGR"
             trend="up"
             trendValue="+5.2%"
             className="border-l-primary"
           />
+          <div onClick={() => topWinner && window.location.assign(`/players/${topWinner.id}`)} className="cursor-pointer">
+            <StatCard
+              title="Top Winner"
+              value={topWinner ? `${(topWinner.netProfit || 0).toFixed(0)} DKK` : 'N/A'}
+              icon={Trophy}
+              description={topWinner ? `User: ${topWinner.username}` : 'No data'}
+              className="border-l-amber-500 cursor-pointer hover:bg-muted/50 transition-colors"
+            />
+          </div>
           <StatCard
-            title="Top Winner (24h)"
-            value={`${topWinner.netProfit.toFixed(0)} DKK`}
-            icon={Trophy}
-            description={`User: ${topWinner.username}`}
-            className="border-l-amber-500"
-          />
-          <StatCard
-            title="New Sign-ups"
-            value={todaysSignups.toString()}
+            title="New Sign-ups (Today)"
+            value={stats?.newSignupsToday?.toString() || '0'}
             icon={UserPlus}
             description="Since midnight"
-            trend="down"
-            trendValue="-2.1%"
           />
         </div>
 
@@ -127,7 +136,7 @@ export default function Dashboard() {
           </Card>
           
           <div className="col-span-3">
-            <RecentActivityFeed activities={activities} />
+            <RecentActivityFeed />
           </div>
         </div>
 
@@ -140,7 +149,7 @@ export default function Dashboard() {
             <CardContent>
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={GAME_PERFORMANCE_DATA} layout="vertical" margin={{ left: 40 }}>
+                  <BarChart data={gamePerformanceData} layout="vertical" margin={{ left: 40 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={true} vertical={false} />
                     <XAxis type="number" hide />
                     <YAxis 
@@ -165,27 +174,28 @@ export default function Dashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Player Risk Distribution</CardTitle>
+              <CardTitle>Top Winners & Losers</CardTitle>
             </CardHeader>
             <CardContent>
                <div className="space-y-4">
-                  {['Low', 'Medium', 'High', 'VIP'].map((risk) => {
-                    const count = users.filter(u => u.riskLevel === risk).length;
-                    const percentage = (count / users.length) * 100;
-                    const color = risk === 'High' ? 'bg-destructive' : risk === 'VIP' ? 'bg-amber-500' : risk === 'Medium' ? 'bg-orange-400' : 'bg-success';
-                    
-                    return (
-                      <div key={risk} className="space-y-1">
-                        <div className="flex justify-between text-sm">
-                          <span>{risk} Risk</span>
-                          <span className="text-muted-foreground">{count} Users ({percentage.toFixed(0)}%)</span>
-                        </div>
-                        <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                          <div className={cn("h-full rounded-full", color)} style={{ width: `${percentage}%` }} />
-                        </div>
-                      </div>
-                    )
-                  })}
+                  <div>
+                    <h4 className="text-xs uppercase text-muted-foreground font-semibold mb-2">Top Winners</h4>
+                    {topUsers?.topWinners?.slice(0, 3).map((user) => (
+                      <Link key={user.id} href={`/players/${user.id}`} className="flex justify-between items-center py-2 border-b border-border last:border-0 cursor-pointer hover:bg-muted/50 px-2 rounded transition-colors">
+                        <span className="text-sm text-primary hover:underline">{user.username}</span>
+                        <span className="text-sm font-mono text-success">+{(user.netProfit || 0).toFixed(0)} DKK</span>
+                      </Link>
+                    ))}
+                  </div>
+                  <div>
+                    <h4 className="text-xs uppercase text-muted-foreground font-semibold mb-2">Top Losers (House Win)</h4>
+                    {topUsers?.topLosers?.slice(0, 3).map((user) => (
+                      <Link key={user.id} href={`/players/${user.id}`} className="flex justify-between items-center py-2 border-b border-border last:border-0 cursor-pointer hover:bg-muted/50 px-2 rounded transition-colors">
+                        <span className="text-sm text-primary hover:underline">{user.username}</span>
+                        <span className="text-sm font-mono text-destructive">{(user.netProfit || 0).toFixed(0)} DKK</span>
+                      </Link>
+                    ))}
+                  </div>
                </div>
             </CardContent>
           </Card>
