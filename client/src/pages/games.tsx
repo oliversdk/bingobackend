@@ -90,7 +90,7 @@ export default function GamesPage() {
                   <p className="text-sm text-muted-foreground">Active Games</p>
                   <p className="text-2xl font-bold">{activeGames} / {games.length}</p>
                 </div>
-                <Badge variant="outline" className="text-success border-success">{Math.round(activeGames/games.length*100)}% Active</Badge>
+                <Badge variant="outline" className="text-success border-success" data-testid="badge-active-games-percent">{games.length > 0 ? Math.round(activeGames/games.length*100) : 0}% Active</Badge>
               </div>
             </CardContent>
           </Card>

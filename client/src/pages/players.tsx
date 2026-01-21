@@ -45,9 +45,12 @@ export default function PlayersPage() {
     return users.filter(user => {
       const matchesRisk = riskFilter === 'All' || user.riskLevel === riskFilter;
       const matchesStatus = statusFilter === 'All' || user.status === statusFilter;
-      return matchesRisk && matchesStatus;
+      const matchesSearch = !searchTerm || 
+        user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchesRisk && matchesStatus && matchesSearch;
     });
-  }, [users, riskFilter, statusFilter]);
+  }, [users, riskFilter, statusFilter, searchTerm]);
 
   const highRiskCount = users.filter(u => u.riskLevel === 'High').length;
   const activeFiltersCount = (riskFilter !== 'All' ? 1 : 0) + (statusFilter !== 'All' ? 1 : 0);
@@ -103,7 +106,7 @@ export default function PlayersPage() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2" data-testid="button-risk-filter">
                 <Filter className="h-4 w-4" />
                 Risk Level
                 {riskFilter !== 'All' && (
@@ -128,7 +131,7 @@ export default function PlayersPage() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2" data-testid="button-status-filter">
                 <Filter className="h-4 w-4" />
                 Status
                 {statusFilter !== 'All' && (
@@ -152,7 +155,7 @@ export default function PlayersPage() {
           </DropdownMenu>
 
           {activeFiltersCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-1 text-muted-foreground hover:text-foreground">
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-1 text-muted-foreground hover:text-foreground" data-testid="button-clear-filters">
               <X className="h-3 w-3" />
               Clear filters
             </Button>

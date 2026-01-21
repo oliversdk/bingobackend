@@ -72,6 +72,7 @@ export default function SettingsPage() {
                   id="notifications"
                   checked={settings.notifications}
                   onCheckedChange={(checked) => updateSetting('notifications', checked)}
+                  data-testid="switch-notifications"
                 />
               </div>
               <Separator />
@@ -85,6 +86,7 @@ export default function SettingsPage() {
                   checked={settings.highRiskAlerts}
                   onCheckedChange={(checked) => updateSetting('highRiskAlerts', checked)}
                   disabled={!settings.notifications}
+                  data-testid="switch-high-risk-alerts"
                 />
               </div>
               <Separator />
@@ -184,6 +186,7 @@ export default function SettingsPage() {
                   id="autoRefresh"
                   checked={settings.autoRefresh}
                   onCheckedChange={(checked) => updateSetting('autoRefresh', checked)}
+                  data-testid="switch-auto-refresh"
                 />
               </div>
               {settings.autoRefresh && (
@@ -261,8 +264,8 @@ export default function SettingsPage() {
         </div>
 
         <div className="flex justify-end gap-4 py-4">
-          <Button variant="outline">Cancel</Button>
-          <Button onClick={handleSave} className="gap-2 min-w-32">
+          <Button variant="outline" data-testid="button-cancel">Cancel</Button>
+          <Button onClick={handleSave} className="gap-2 min-w-32" data-testid="button-save-settings">
             {saved ? (
               <>
                 <Check className="h-4 w-4" />

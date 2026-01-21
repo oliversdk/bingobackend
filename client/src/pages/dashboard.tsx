@@ -63,13 +63,13 @@ export default function Dashboard() {
           {(highRiskUsers.length > 0 || largeTransactions.length > 0) && (
             <div className="flex items-center gap-3">
               {highRiskUsers.length > 0 && (
-                <Link href="/players" className="flex items-center gap-2 px-3 py-2 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm animate-pulse hover:bg-destructive/20 transition-colors">
+                <Link href="/players" className="flex items-center gap-2 px-3 py-2 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm animate-pulse hover:bg-destructive/20 transition-colors" data-testid="alert-high-risk-players">
                   <AlertTriangle className="h-4 w-4" />
                   <span className="font-medium">{highRiskUsers.length} High Risk Players</span>
                 </Link>
               )}
               {largeTransactions.length > 0 && (
-                <div className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-500 text-sm">
+                <div className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-500 text-sm" data-testid="alert-large-transactions">
                   <DollarSign className="h-4 w-4" />
                   <span className="font-medium">{largeTransactions.length} Large Transactions</span>
                 </div>
