@@ -21,6 +21,7 @@ import logoImage from '@assets/generated_images/minimalist_tech_logo_for_bingo.d
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/" },
   { label: "Players", icon: Users, href: "/players" },
+  { label: "Leaderboard", icon: Trophy, href: "/leaderboard" },
   { label: "Game Performance", icon: Gamepad2, href: "/games" },
   { label: "Affiliates", icon: HandCoins, href: "/affiliates" },
   { label: "Live Monitor", icon: Activity, href: "/live" },
