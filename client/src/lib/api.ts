@@ -147,3 +147,9 @@ export const topUsersQueryOptions = () =>
     queryKey: ["topUsers"],
     queryFn: () => fetchJson<TopUsers>("/api/dashboard/top-users"),
   });
+
+export const leaderboardQueryOptions = () =>
+  queryOptions({
+    queryKey: ["leaderboard"],
+    queryFn: () => fetchJson<TopUsers>("/api/leaderboard"),
+  });

@@ -7,7 +7,8 @@ import {
   Settings, 
   LogOut,
   Activity,
-  Menu
+  Menu,
+  Trophy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";

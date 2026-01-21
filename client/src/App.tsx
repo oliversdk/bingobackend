@@ -13,6 +13,7 @@ import AffiliatesPage from "@/pages/affiliates";
 import AffiliateDetailPage from "@/pages/affiliate-detail";
 import LiveMonitorPage from "@/pages/live-monitor";
 import SettingsPage from "@/pages/settings";
+import LeaderboardPage from "@/pages/leaderboard";
 
 function Router() {
   return (
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/affiliates" component={AffiliatesPage} />
       <Route path="/affiliates/:id" component={AffiliateDetailPage} />
       <Route path="/live" component={LiveMonitorPage} />
+      <Route path="/leaderboard" component={LeaderboardPage} />
       <Route path="/settings" component={SettingsPage} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />

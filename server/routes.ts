@@ -201,5 +201,30 @@ export async function registerRoutes(
     }
   });
 
+  // LEADERBOARD - Top 50 Winners and Losers
+  app.get("/api/leaderboard", async (req: Request, res: Response) => {
+    try {
+      const users = await storage.getUsers(200);
+      
+      const usersWithProfit = await Promise.all(
+        users.map(async (user) => {
+          const stats = await storage.getUserStats(user.id);
+          return { ...user, netProfit: stats.netProfit };
+        })
+      );
+
+      // Sort by net profit (highest winners first)
+      usersWithProfit.sort((a, b) => b.netProfit - a.netProfit);
+      
+      const topWinners = usersWithProfit.slice(0, 50);
+      const topLosers = usersWithProfit.slice(-50).reverse();
+
+      res.json({ topWinners, topLosers });
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error);
+      res.status(500).json({ error: "Failed to fetch leaderboard" });
+    }
+  });
+
   return httpServer;
 }
