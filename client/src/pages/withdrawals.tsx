@@ -87,7 +87,7 @@ function WithdrawalRow({ withdrawal, onApprove, onReverse }: {
           status === 'Reversed' && "bg-muted text-muted-foreground"
         )}>
           {status === 'Pending' && 'Afventer'}
-          {status === 'Approved' && 'Godkendt'}
+          {status === 'Approved' && 'Udbetalt'}
           {status === 'Reversed' && 'Reverseret'}
         </Badge>
       </div>
@@ -107,7 +107,7 @@ function WithdrawalRow({ withdrawal, onApprove, onReverse }: {
             onClick={() => onApprove(withdrawal.id)}
             data-testid={`btn-approve-${withdrawal.id}`}
           >
-            Godkend
+            Udbetal
           </Button>
           <Button 
             size="sm" 
@@ -201,7 +201,7 @@ export default function WithdrawalsPage() {
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Godkendt</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Udbetalt</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-success">{approvedWithdrawals.length}</div>
@@ -227,7 +227,7 @@ export default function WithdrawalsPage() {
             </TabsTrigger>
             <TabsTrigger value="approved" className="gap-2" data-testid="tab-approved">
               <CheckCircle className="h-4 w-4" />
-              Godkendt ({approvedWithdrawals.length})
+              Udbetalt ({approvedWithdrawals.length})
             </TabsTrigger>
             <TabsTrigger value="reversed" className="gap-2" data-testid="tab-reversed">
               <RotateCcw className="h-4 w-4" />
@@ -260,11 +260,11 @@ export default function WithdrawalsPage() {
           <TabsContent value="approved" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Godkendte Udbetalinger</CardTitle>
+                <CardTitle>Udbetalte</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {approvedWithdrawals.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">Ingen godkendte udbetalinger</p>
+                  <p className="text-muted-foreground text-center py-8">Ingen udbetalinger endnu</p>
                 ) : (
                   approvedWithdrawals.map(w => (
                     <WithdrawalRow 
